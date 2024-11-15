@@ -28,14 +28,16 @@ exports.createCar = async (req, res) => {
     // Array to hold URLs of uploaded images
     const imageUrls = [];
 
-    // Loop through each file and upload to Cloudinary
-    for (const image of images) {
-      const result = await uploadImageToCloudinary(image, process.env.FOLDER_NAME);
-      imageUrls.push(result.secure_url); // Store the Cloudinary URL
+    if(images){
+        // Loop through each file and upload to Cloudinary
+        for (const image of images) {
+          const result = await uploadImageToCloudinary(image, process.env.FOLDER_NAME);
+          imageUrls.push(result.secure_url); // Store the Cloudinary URL
+        }
     }
 
     // Create new car with image URLs
-    const car = new Car({
+    const car = new Cars({
       user: user._id,
       title,
       description,
@@ -70,13 +72,16 @@ exports.createCar = async (req, res) => {
 // update Car
 exports.updateCar = async (req, res) => {
   try {
-    const userId = req.user.id; // Assuming user ID is retrieved from authentication middleware
-    const carId = req.params.carId;
-    const { title, description, tags, existingImages } = req.body; // `existingImages` is an array of URLs for images to retain
+    const userId = req.user.id;
+    const { carId, title, description, tags, existingImages } = req.body; // `existingImages` is an array of URLs for images to retain
+    // Retrieve images from req.files
     const newImages = req.files; // New images are in req.files
 
+    // Convert `newImages` to an array if it exists
+    const imagesArray = newImages ? Object.values(newImages) : [];
+
     // Check if carId is provided and whether any data is present to update
-    if (!carId || (!title && !description && !tags && (!newImages || newImages.length === 0))) {
+    if (!carId || !(title || description || tags || (imagesArray && imagesArray.length !== 0))) {
       return res.status(400).json({
         success: false,
         message: "No valid data to update. Please provide title, description, tags, or images.",
@@ -101,8 +106,8 @@ exports.updateCar = async (req, res) => {
     let updatedImages = existingImages || []; // Start with the existing images the user wants to retain
 
     // Upload new images to Cloudinary
-    if (newImages && newImages.length > 0) {
-      for (const image of newImages) {
+    if (imagesArray && imagesArray.length > 0) {
+        for (const image of imagesArray) {
         const result = await uploadImageToCloudinary(image, process.env.FOLDER_NAME);
         updatedImages.push(result.secure_url); // Add new image URL to `updatedImages`
       }
@@ -139,7 +144,7 @@ exports.updateCar = async (req, res) => {
 exports.getCarDetails = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { carId } = req.params;  // Extract carId from the route params
+    const { carId } = req.body;  // Extract carId from the route params
 
     // Find the car by its ID and check if it belongs to the current user
     const car = await Cars.find({ _id: carId, user: userId}).populate("user").exec();

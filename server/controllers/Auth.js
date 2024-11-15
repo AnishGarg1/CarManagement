@@ -5,14 +5,21 @@ require("dotenv").config();
 
 exports.signup = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
     }
+
+    // if(password !== confirmPassword){
+    //     return res.status(400).json({
+    //         success: false,
+    //         message: "Password do not match",
+    //     });
+    // }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

@@ -4,9 +4,11 @@ const dotenv = require("dotenv");
 const database = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors")
+const fileUpload = require("express-fileupload");
 
 const userRoutes = require("./routes/User");
 const carRoutes = require("./routes/Car");
+const { cloudinaryConnect } = require("./config/cloudinary");
 
 // Connecting to database
 database.dbConnect();
@@ -21,6 +23,15 @@ app.use(cors({
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
+
+app.use(
+    fileUpload({
+        useTempFiles:true,
+        tempFileDir:"/tmp",
+    })
+)
+//cloudinary connection
+cloudinaryConnect();
 
 const PORT = process.env.PORT || 4000;
 
