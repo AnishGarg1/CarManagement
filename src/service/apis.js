@@ -6,7 +6,7 @@ export const authEndpoints = {
     SIGNUP_API: BASE_URL + "/auth/signup",
 }
 
-// Task Endpoints
+// Car Endpoints
 export const carEndpoints = {
     CREATE_CAR_API: BASE_URL + "/car/createCar",
     GET_CAR_API: BASE_URL + "/car/getCar",

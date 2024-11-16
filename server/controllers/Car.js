@@ -9,7 +9,7 @@ exports.createCar = async (req, res) => {
     const { title, description, tags } = req.body;
     const images = req.files; // Images are in req.files
 
-    if (!userId || !title || !description || !tags) {
+    if (!title) {
       return res.status(400).json({
         success: false,
         message: "Please fill all details",
@@ -69,18 +69,31 @@ exports.createCar = async (req, res) => {
   }
 };
 
-// update Car
+// updateCar method to handle image uploads without multer
 exports.updateCar = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { carId, title, description, tags, existingImages } = req.body; // `existingImages` is an array of URLs for images to retain
-    // Retrieve images from req.files
-    const newImages = req.files; // New images are in req.files
+    const { carId, title, description, tags, existingImages } = req.body; // existingImages to retain current images
+    // const newImages = req.files; // New images from req.files
+    const newImages = req.files['newImages[]']; // Access the array of images
 
     // Convert `newImages` to an array if it exists
-    const imagesArray = newImages ? Object.values(newImages) : [];
+    // const imagesArray = newImages ? Object.values(newImages) : [];
+    const imagesArray = newImages;
 
-    // Check if carId is provided and whether any data is present to update
+    // // Validate image file types (optional server-side check for images)
+    // for (let i = 0; i < imagesArray.length; i++) {
+    //   const image = imagesArray[i];
+    //   const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    //   if (!allowedTypes.includes(image.mimetype)) {
+    //     return res.status(400).json({
+    //       success: false,
+    //       message: "Only image files (JPEG, PNG, JPG, GIF) are allowed.",
+    //     });
+    //   }
+    // }
+
+    // Ensure carId and data are provided
     if (!carId || !(title || description || tags || (imagesArray && imagesArray.length !== 0))) {
       return res.status(400).json({
         success: false,
@@ -88,7 +101,7 @@ exports.updateCar = async (req, res) => {
       });
     }
 
-    // Find car by both carId and userId for ownership verification
+    // Find car and verify ownership
     const car = await Cars.findOne({ _id: carId, user: userId });
     if (!car) {
       return res.status(404).json({
@@ -97,32 +110,30 @@ exports.updateCar = async (req, res) => {
       });
     }
 
-    // Update fields if provided
+    // Update car fields if provided
     if (title) car.title = title;
     if (description) car.description = description;
     if (tags) car.tags = tags;
 
     // Handle image updates
-    let updatedImages = existingImages || []; // Start with the existing images the user wants to retain
+    let updatedImages = existingImages || []; // Keep existing images the user wants to retain
 
-    // Upload new images to Cloudinary
+    // Upload new images to Cloudinary (handle each image)
     if (imagesArray && imagesArray.length > 0) {
-        for (const image of imagesArray) {
-        const result = await uploadImageToCloudinary(image, process.env.FOLDER_NAME);
-        updatedImages.push(result.secure_url); // Add new image URL to `updatedImages`
+      for (const image of imagesArray) {
+        const result = await uploadImageToCloudinary(image, process.env.FOLDER_NAME); // Assuming this uploads to Cloudinary
+        updatedImages.push(result.secure_url); // Add new image URL to updatedImages
       }
     }
 
-    // Remove images from Cloudinary if they are no longer in `updatedImages`
+    // Optionally, remove images from Cloudinary if no longer in `updatedImages`
     // const imagesToDelete = car.images.filter(img => !updatedImages.includes(img));
     // for (const img of imagesToDelete) {
-    //   await deleteImageFromCloudinary(img); // Delete from Cloudinary (assuming you have a function for this)
+    //   await deleteImageFromCloudinary(img); // Function to delete from Cloudinary
     // }
 
-    // Update car images with the new list (including both retained and newly uploaded images)
+    // Save updated car
     car.images = updatedImages;
-
-    // Save updated car details
     const updatedCar = await car.save();
 
     return res.status(200).json({
@@ -138,7 +149,6 @@ exports.updateCar = async (req, res) => {
     });
   }
 };
-
 
 // Get car details
 exports.getCarDetails = async (req, res) => {
@@ -159,7 +169,7 @@ exports.getCarDetails = async (req, res) => {
     // Return the car details
     return res.status(200).json({
       success: true,
-      car,
+      car: car[0],
       message: "Car details fetched successfully",
     });
   } catch (error) {

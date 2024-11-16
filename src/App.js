@@ -2,13 +2,13 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Home from "./components/pages/Home";
 import Error from "./components/pages/Error";
-import About from "./components/pages/About";
-import Contact from "./components/pages/Contact";
 import Navbar from "./components/Navbar";
 import OpenRoute from "./components/Auth/OpenRoute";
 import PrivateRoute from "./components/Auth/PrivateRoute";
 import Login from "./components/pages/Login";
 import Signup from "./components/pages/Signup";
+import Dashboard from "./components/Dashboard";
+import Car from "./components/Car/Car";
 
 function App() {
   return (
@@ -42,19 +42,19 @@ function App() {
           path='/dashboard' 
           element={
             <PrivateRoute>
-              {/* <Dashboard/> */}
+              <Dashboard/>
             </PrivateRoute>
           }
         />
         
-        {/* <Route 
-          path='/task/:taskId' 
+        <Route 
+          path='/car/:carId' 
           element={
             <PrivateRoute>
-              <Task/>
+              <Car/>
             </PrivateRoute>
           }
-        /> */}
+        />
         
         <Route path='/contact' element={<div className='w-full flex justify-center border-2'>Contact</div>}/>
         <Route path='/about' element={<div className='w-full flex justify-center border-2'>About us</div>}/>

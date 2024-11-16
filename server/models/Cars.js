@@ -8,11 +8,11 @@ const carSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      require: true,
+      required: true,
     },
     title: {
       type: String,
-      require: true,
+      required: true,
       trim: true,
     },
     description: {
@@ -21,7 +21,7 @@ const carSchema = new mongoose.Schema(
     },
     tags: {
       type: [String],
-      required: true,
+      // required: true,
     },
     images: {
       type: [String],

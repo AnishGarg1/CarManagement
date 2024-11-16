@@ -104,7 +104,8 @@ export const updateCar = async (data, token, dispatch) => {
             "PUT",
             UPDATE_CAR_API,
             data,
-            {
+            {   
+                "Content-Type": "multipart/form-data",
                 Authorization: `Bearer ${token}`
             }
         );
