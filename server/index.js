@@ -19,7 +19,7 @@ dotenv.config(); // parsing .env file variables
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:3000", "https://Car-Management.netlify.app"],
+    origin: ["http://localhost:3000", "https://car-trackr.netlify.app/"],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
